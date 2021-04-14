@@ -158,6 +158,21 @@ import sys
 # --- IMPLEMENTATION GOES HERE -----------------------------------------------
 #  Student helpers (functions, constants, etc.) can be defined here, if needed
 
+def get_decimal_matrix_by_size(string, size):
+    new_array = []
+    temporal_array = []
+    for i in range(len(string)):
+        next_range = i + 1
+        temp_value = string[i:next_range]
+        new_value = int.from_bytes(temp_value, byteorder=sys.byteorder)
+        temporal_array.append(new_value)
+        if len(temporal_array) >= size:
+            new_array.append(temporal_array)
+            temporal_array = []
+    if len(temporal_array) > 0:
+        new_array.append(temporal_array)
+    return new_array
+
 
 # ----------------------------------------------------------------------------
 
@@ -172,6 +187,16 @@ def uoc_add_round_key(state, key):
 
     #### IMPLEMENTATION GOES HERE ####
 
+    ## Convertir la key en una matriz
+
+    size = len(state)
+    key_matrix = get_decimal_matrix_by_size(key,size)
+
+    for i in range(size):
+        for z in range(size):
+            state[i][z] = state[i][z] ^ key_matrix[i][z]
+
+
     # --------------------------------
 
     return state
@@ -185,6 +210,14 @@ def uoc_byte_sub(state, inverse=False):
     """
 
     #### IMPLEMENTATION GOES HERE ####
+
+    size = len(state)
+    for i in range(size):
+        for z in range(size):
+            if inverse:
+                state[i][z] = INV_S_BOX[state[i][z]]
+            else:
+                state[i][z] = S_BOX[state[i][z]]
 
     # --------------------------------
 
@@ -305,3 +338,9 @@ def uoc_aes_decipher(message, key):
 
     return plaintext
 
+if __name__ == '__main__':
+    key = b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f'
+    state = [[0, 17, 34, 51], [68, 85, 102, 119], [136, 153, 170, 187], [204, 221, 238, 255]]
+    new_state = [[0, 16, 32, 48], [64, 80, 96, 112], [128, 144, 160, 176], [192, 208, 224, 240]]
+    r = uoc_add_round_key(state, key)
+    print(r)
