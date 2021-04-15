@@ -305,6 +305,8 @@ def uoc_aes_genkey():
 
     # --- IMPLEMENTATION GOES HERE ---
 
+    key = os.urandom(16)
+
     # --------------------------------
 
     return key
@@ -362,12 +364,5 @@ def uoc_aes_decipher(message, key):
     return plaintext
 
 if __name__ == '__main__':
-    state = [[122, 213, 253, 167], [137, 239, 78, 39], [43, 202, 16, 11], [61, 159, 245, 159]]
-    new_state = [[122, 159, 16, 39], [137, 213, 245, 11], [43, 239, 253, 159], [61, 202, 78, 167]]
-    r = uoc_shift_row(state, True)
-
-    for row in new_state:
-        print(row)
-    print('----------')
-    for row in r:
-        print(row)
+    r = uoc_aes_genkey()
+    print(r)
