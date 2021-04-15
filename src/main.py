@@ -173,6 +173,15 @@ def get_decimal_matrix_by_size(string, size):
         new_array.append(temporal_array)
     return new_array
 
+def swift_rows_and_columns(matrix):
+    new_matrix = []
+    size = len(matrix)
+    for i in range(size):
+        new_row= []
+        for z in range(size):
+            new_row.append(matrix[z][i])
+        new_matrix.append(new_row)
+    return new_matrix
 
 # ----------------------------------------------------------------------------
 
@@ -232,6 +241,20 @@ def uoc_shift_row(state, inverse=False):
     """
 
     #### IMPLEMENTATION GOES HERE ####
+    swifted_state = swift_rows_and_columns(state)
+
+    new_state = []
+    size = len(state)
+    for i in range(size):
+        row = swifted_state[i]
+        if inverse:
+            new_row =  row[len(row)-i:]+row[:len(row)-i]
+            new_state.append(new_row)
+        else:
+            new_row =  row[i:]+row[:i]
+            new_state.append(new_row)
+
+    state = swift_rows_and_columns(new_state)
 
     # --------------------------------
 
@@ -339,8 +362,12 @@ def uoc_aes_decipher(message, key):
     return plaintext
 
 if __name__ == '__main__':
-    key = b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f'
-    state = [[0, 17, 34, 51], [68, 85, 102, 119], [136, 153, 170, 187], [204, 221, 238, 255]]
-    new_state = [[0, 16, 32, 48], [64, 80, 96, 112], [128, 144, 160, 176], [192, 208, 224, 240]]
-    r = uoc_add_round_key(state, key)
-    print(r)
+    state = [[122, 213, 253, 167], [137, 239, 78, 39], [43, 202, 16, 11], [61, 159, 245, 159]]
+    new_state = [[122, 159, 16, 39], [137, 213, 245, 11], [43, 239, 253, 159], [61, 202, 78, 167]]
+    r = uoc_shift_row(state, True)
+
+    for row in new_state:
+        print(row)
+    print('----------')
+    for row in r:
+        print(row)
