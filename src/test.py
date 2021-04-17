@@ -319,14 +319,13 @@ if __name__ == '__main__':
 
     # create a suite with all tests
 
-    # test_classes_to_run = [Test_1_1_AddRoundKey,
-    #                        Test_1_2_ByteSub,
-    #                        Test_1_3_ShiftRow,
-    #                        Test_2_1_GenKey,
-    #                        Test_2_2_ExpandKey,
-    #                        Test_2_3_Cipher,
-    #                        Test_2_4_Decipher]
-    test_classes_to_run = [Test_1_1_AddRoundKey, Test_1_2_ByteSub, Test_1_3_ShiftRow, Test_2_1_GenKey,Test_2_2_ExpandKey, Test_2_3_Cipher]
+    test_classes_to_run = [Test_1_1_AddRoundKey,
+                           Test_1_2_ByteSub,
+                           Test_1_3_ShiftRow,
+                           Test_2_1_GenKey,
+                           Test_2_2_ExpandKey,
+                           Test_2_3_Cipher,
+                           Test_2_4_Decipher]
 
     loader = unittest.TestLoader()
     suites_list = []
