@@ -173,7 +173,7 @@ def get_decimal_matrix_by_size(string, size):
         new_array.append(temporal_array)
     return new_array
 
-def swift_rows_and_columns(matrix):
+def switch_rows_and_columns(matrix):
     new_matrix = []
     size = len(matrix)
     for i in range(size):
@@ -183,6 +183,11 @@ def swift_rows_and_columns(matrix):
         new_matrix.append(new_row)
     return new_matrix
 
+def rot_word(word):
+    return word[1:] + word[0:1]
+
+def sub_word(word):
+    return [S_BOX[byte] for byte in word]
 # ----------------------------------------------------------------------------
 
 
@@ -241,12 +246,12 @@ def uoc_shift_row(state, inverse=False):
     """
 
     #### IMPLEMENTATION GOES HERE ####
-    swifted_state = swift_rows_and_columns(state)
+    switched_state = switch_rows_and_columns(state)
 
     new_state = []
     size = len(state)
     for i in range(size):
-        row = swifted_state[i]
+        row = switched_state[i]
         if inverse:
             new_row =  row[len(row)-i:]+row[:len(row)-i]
             new_state.append(new_row)
@@ -254,7 +259,7 @@ def uoc_shift_row(state, inverse=False):
             new_row =  row[i:]+row[:i]
             new_state.append(new_row)
 
-    state = swift_rows_and_columns(new_state)
+    state = switch_rows_and_columns(new_state)
 
     # --------------------------------
 
@@ -322,7 +327,34 @@ def uoc_expand_key(key):
     subkeys = []
 
     #### IMPLEMENTATION GOES HERE ####
+    Nb=4
+    Nk=4
+    Nr=10
 
+    w = []
+    size= len(key)
+    for i in range(size):
+        w.append(key[i])
+
+    print(w)
+    i = Nk
+
+    while i < Nb * (Nr + 1):
+        temp = w[i - 1]
+        if i % Nk == 0:
+            temp = sub_word(rot_word(temp))
+            temp[0] ^= R_CON[(i // Nk)]
+        elif Nk > 6 and i % Nk == 4:
+            temp = sub_word(temp)
+
+        for j in range(len(temp)):
+            temp[j] ^= w[i - Nk][j]
+
+        w.append(temp[:])
+
+        i += 1
+
+    print(w)
     # --------------------------------
 
     return subkeys
@@ -364,5 +396,18 @@ def uoc_aes_decipher(message, key):
     return plaintext
 
 if __name__ == '__main__':
-    r = uoc_aes_genkey()
+    key = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    subkeys = [b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+               b'bcccbcccbcccbccc',
+               b'\x9b\x98\x98\xc9\xf9\xfb\xfb\xaa\x9b\x98\x98\xc9\xf9\xfb\xfb\xaa',
+               b'\x90\x974Pil\xcf\xfa\xf2\xf4W3\x0b\x0f\xac\x99',
+               b'\xee\x06\xda{\x87j\x15\x81u\x9eB\xb2~\x91\xee+',
+               b'\x7f.+\x88\xf8D>\t\x8d\xda|\xbb\xf3K\x92\x90',
+               b'\xecaK\x85\x14%u\x8c\x99\xff\t7j\xb4\x9b\xa7',
+               b'!u\x17\x875Pb\x0b\xac\xafk<\xc6\x1b\xf0\x9b',
+               b'\x0e\xf9\x033;\xa9a8\x97\x06\n\x04Q\x1d\xfa\x9f',
+               b'\xb1\xd4\xd8\xe2\x8a}\xb9\xda\x1d{\xb3\xdeLfIA',
+               b'\xb4\xef[\xcb>\x92\xe2\x11#\xe9Q\xcfo\x8f\x18\x8e']
+    r = uoc_expand_key(key)
     print(r)
+    print(subkeys)
