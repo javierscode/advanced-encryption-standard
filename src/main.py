@@ -191,6 +191,17 @@ def sub_word(word):
     for value in word:
         new_word.append(S_BOX[value])
     return new_word
+
+def get_state(string):
+    new_state = []
+    row = []
+    for i in range(len(string)):
+        row.append(string[i])
+        if (i+1) % 4 == 0:
+            new_state.append(row)
+            row = []
+
+    return new_state
 # ----------------------------------------------------------------------------
 
 
@@ -382,6 +393,24 @@ def uoc_aes_cipher(message, key):
 
     #### IMPLEMENTATION GOES HERE ####
 
+    state = get_state(message)
+
+    state = uoc_add_round_key(state,key)
+
+    keyList = uoc_expand_key(key)
+
+    for r in range(1, len(keyList)-1):
+        state = uoc_byte_sub(state)
+        state = uoc_shift_row(state)
+        state = uoc_mix_columns(state)
+        state = uoc_add_round_key(state, keyList[r])
+
+    state = uoc_byte_sub(state)
+    state = uoc_shift_row(state)
+    state = uoc_add_round_key(state,keyList[len(keyList)-1])
+
+    for row in state:
+        ciphertext += bytes(row)
     # --------------------------------
 
     return ciphertext
@@ -405,12 +434,13 @@ def uoc_aes_decipher(message, key):
     return plaintext
 
 if __name__ == '__main__':
+    # Fips 197
     key = b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f'
     plaintext = b'\x00\x11\x22\x33\x44\x55\x66\x77\x88\x99\xaa\xbb\xcc\xdd\xee\xff'
     ciphertext = b'\x69\xc4\xe0\xd8\x6a\x7b\x04\x30\xd8\xcd\xb7\x80\x70\xb4\xc5\x5a'
-    new_plaintext = uoc_aes_decipher(ciphertext, key)
+    new_ciphertext = uoc_aes_cipher(plaintext, key)
 
+    print(new_ciphertext)
     print(ciphertext)
-    print(new_plaintext)
 
 
