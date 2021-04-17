@@ -187,7 +187,10 @@ def rot_word(word):
     return word[1:] + word[0:1]
 
 def sub_word(word):
-    return [S_BOX[byte] for byte in word]
+    new_word = []
+    for value in word:
+        new_word.append(S_BOX[value])
+    return new_word
 # ----------------------------------------------------------------------------
 
 
@@ -327,34 +330,40 @@ def uoc_expand_key(key):
     subkeys = []
 
     #### IMPLEMENTATION GOES HERE ####
-    Nb=4
     Nk=4
     Nr=10
 
-    w = []
-    size= len(key)
-    for i in range(size):
-        w.append(key[i])
+    w = get_decimal_matrix_by_size(key,Nk)
 
-    print(w)
     i = Nk
+    while i < 4*(Nr+1):
+        temp = []
+        for value in w[i-1]:
+            temp.append(value)
 
-    while i < Nb * (Nr + 1):
-        temp = w[i - 1]
         if i % Nk == 0:
+            index = int(i/Nk)
             temp = sub_word(rot_word(temp))
-            temp[0] ^= R_CON[(i // Nk)]
+            temp[0] ^= R_CON[index]
         elif Nk > 6 and i % Nk == 4:
             temp = sub_word(temp)
 
         for j in range(len(temp)):
-            temp[j] ^= w[i - Nk][j]
+            w_xor = int(w[i-Nk][j])
+            temp[j] = temp[j] ^ w_xor
 
-        w.append(temp[:])
-
+        w.append(temp)
         i += 1
 
-    print(w)
+    temp_row = []
+    for i in range(len(w)):
+        row = w[i]
+        for value in row:
+            temp_row.append(value)
+        if (i+1) % 4 ==0:
+            subkeys.append(bytes(temp_row))
+            temp_row= []
+
     # --------------------------------
 
     return subkeys
@@ -396,18 +405,12 @@ def uoc_aes_decipher(message, key):
     return plaintext
 
 if __name__ == '__main__':
-    key = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-    subkeys = [b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
-               b'bcccbcccbcccbccc',
-               b'\x9b\x98\x98\xc9\xf9\xfb\xfb\xaa\x9b\x98\x98\xc9\xf9\xfb\xfb\xaa',
-               b'\x90\x974Pil\xcf\xfa\xf2\xf4W3\x0b\x0f\xac\x99',
-               b'\xee\x06\xda{\x87j\x15\x81u\x9eB\xb2~\x91\xee+',
-               b'\x7f.+\x88\xf8D>\t\x8d\xda|\xbb\xf3K\x92\x90',
-               b'\xecaK\x85\x14%u\x8c\x99\xff\t7j\xb4\x9b\xa7',
-               b'!u\x17\x875Pb\x0b\xac\xafk<\xc6\x1b\xf0\x9b',
-               b'\x0e\xf9\x033;\xa9a8\x97\x06\n\x04Q\x1d\xfa\x9f',
-               b'\xb1\xd4\xd8\xe2\x8a}\xb9\xda\x1d{\xb3\xdeLfIA',
-               b'\xb4\xef[\xcb>\x92\xe2\x11#\xe9Q\xcfo\x8f\x18\x8e']
-    r = uoc_expand_key(key)
-    print(r)
-    print(subkeys)
+    key = b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f'
+    plaintext = b'\x00\x11\x22\x33\x44\x55\x66\x77\x88\x99\xaa\xbb\xcc\xdd\xee\xff'
+    ciphertext = b'\x69\xc4\xe0\xd8\x6a\x7b\x04\x30\xd8\xcd\xb7\x80\x70\xb4\xc5\x5a'
+    new_plaintext = uoc_aes_decipher(ciphertext, key)
+
+    print(ciphertext)
+    print(new_plaintext)
+
+
